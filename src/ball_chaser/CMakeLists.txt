@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(ball_chaser)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -59,7 +59,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Service1.srv
 #   Service2.srv
 # )
-
+add_service_files(
+   FILES
+   DriveToTarget.srv
+)
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -72,7 +75,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   DEPENDENCIES
 #   std_msgs
 # )
-
+generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+)
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -201,6 +207,12 @@ include_directories(
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_executable(drive_bot src/drive_bot.cpp)
+target_link_libraries(drive_bot ${catkin_LIBRARIES})
+add_dependencies(drive_bot ball_chaser_generate_messages_cpp)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
