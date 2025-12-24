@@ -36,35 +36,41 @@ void process_image_callback(const sensor_msgs::Image img)
     // Then, identify if this pixel falls in the left, mid, or right side of the image
     // Depending on the white ball position, call the drive_bot function and pass velocities to it
     // Request a stop when there's no white ball seen by the camera
-    uint32_t width  = img.width;
-    uint32_t height = img.height;
+ 
     drive_robot(0.0, 0.0);
     
-    for (uint32_t y = 0; y < height;y++){
-        for (uint32_t x = 0; x < width;x++){
-        
-    	    int index = y * img.step + x * 3;
+    
+    for (size_t i = 0; i < img.data.size(); i += 3) {
+	int red = img.data[i];
+	int green = img.data[i + 1];
+	int blue = img.data[i + 2];
 
-            uint8_t c1 = img.data[index + 0];
-            uint8_t c2 = img.data[index + 1];
-            uint8_t c3 = img.data[index + 2];
-            
-            if (c1 == white_pixel && c2 == white_pixel && c3 == white_pixel) {
-                if (x < width/3){
-                	ROS_INFO("Driving Left");
-                	drive_robot(0.0, 0.1);
-                }else if (x < (2 * width) / 3){
-                	ROS_INFO("Driving Forward");
-                	drive_robot(0.5, 0.0);
-                }else {
-                	ROS_INFO("Driving Right");
-                	drive_robot(0.0, -0.1);
-                }
-                
-                
-            }
-    	}
-    }
+	// Next check if you found the white color ball
+	if (red == white_pixel && green == white_pixel && blue == white_pixel) {
+	// Found a white pixel, which means finding the ball
+	// Next step would be decide how to move based on the
+	// calculated pixel position or coordinates in the image
+		int pixel_index = i / 3;
+		int x = pixel_index % img.width;
+
+		if (x < img.width / 3) {
+		    ROS_INFO("Driving Left");
+		    drive_robot(0.0, 0.1);
+
+		} else if (x < (2 * img.width) / 3) {
+		    ROS_INFO("Driving Forward");
+		    drive_robot(0.5, 0.0);
+
+		} else {
+		    ROS_INFO("Driving Right");
+		    drive_robot(0.0, -0.1);
+		}
+
+		return;
+	}
+	}
+    
+
     
     
 }
