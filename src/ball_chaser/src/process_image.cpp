@@ -11,6 +11,18 @@ void drive_robot(float lin_x, float ang_z)
     // TODO: Request a service and pass the velocities to it to drive the robot
     ROS_INFO("DriveToTarget Request received - Linear x: %f , angular z: %f",lin_x,ang_z);
     
+    // Create service request
+    ball_chaser::DriveToTarget srv;
+    srv.request.linear_x  = lin_x;
+    srv.request.angular_z = ang_z;
+    
+    // Call the service and check for success
+    if (client.call(srv)) {
+        ROS_INFO("Service response: %s", srv.response.msg_feedback.c_str());
+    } else {
+        ROS_ERROR("Failed to call service /ball_chaser/command_robot");
+    }
+    
     
 }
 
@@ -26,6 +38,7 @@ void process_image_callback(const sensor_msgs::Image img)
     // Request a stop when there's no white ball seen by the camera
     uint32_t width  = img.width;
     uint32_t height = img.height;
+    drive_robot(0.0, 0.0);
     
     for (uint32_t y = 0; y < height;y++){
         for (uint32_t x = 0; x < width;x++){
@@ -39,10 +52,13 @@ void process_image_callback(const sensor_msgs::Image img)
             if (c1 == white_pixel && c2 == white_pixel && c3 == white_pixel) {
                 if (x < width/3){
                 	ROS_INFO("Driving Left");
+                	drive_robot(0.0, 0.1);
                 }else if (x < (2 * width) / 3){
                 	ROS_INFO("Driving Forward");
+                	drive_robot(0.5, 0.0);
                 }else {
                 	ROS_INFO("Driving Right");
+                	drive_robot(0.0, -0.1);
                 }
                 
                 
